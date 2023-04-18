@@ -1,12 +1,13 @@
 # Bibliotecas:
 
+from os import uname_result
 from flask import Flask, jsonify, request, send_file
 from tinydb import TinyDB, Query
 from openpyxl import Workbook
 
 # Rotas:
 
-app = Flask(_name_)
+app = Flask(uname_result)
 db = TinyDB('db.json')
 
 @app.route('/alunos', methods=['GET'])
