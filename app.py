@@ -231,22 +231,27 @@ def gerar_relatorio(estudante_id, disciplina_id):
     faltas = faltas_table.search((Query().estudante_id == estudante_id) & (Query().disciplina_id == disciplina_id))
 
     # Cria um DataFrame com as notas e faltas
+    
     df_notas = pd.DataFrame(notas)
     df_faltas = pd.DataFrame(faltas)
 
     # Agrupa as notas por tipo e calcula a média
+    
     df_notas = df_notas.groupby('tipo').agg({'valor': 'mean'}).reset_index()
 
     # Calcula o total de faltas
+    
     total_faltas = df_faltas['quantidade'].sum()
 
     # Cria um arquivo Excel com o relatório
+    
     writer = pd.ExcelWriter('relatorio.xlsx', engine='openpyxl')
     df_notas.to_excel(writer, sheet_name='Notas', index=False)
     df_faltas.to_excel(writer, sheet_name='Faltas', index=False)
     writer.save()
 
     # Envia o arquivo Excel como resposta
+    
     return send_file('relatorio.xlsx', as_attachment=True)
 
 if __name__ == "__main__":
