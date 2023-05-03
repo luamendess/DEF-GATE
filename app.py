@@ -1,3 +1,5 @@
+#Bibliotecas:
+
 from flask import Flask, request, jsonify, send_file
 from tinydb import TinyDB, Query
 import pandas as pd
