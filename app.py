@@ -1,258 +1,200 @@
-#Bibliotecas:
-
-from flask import Flask, request, jsonify, send_file
-from tinydb import TinyDB, Query
+# Bibliotecas usadas
+import firebase_admin
+from firebase_admin import credentials
+from firebase_admin import firestore
+from flask import Flask, jsonify, request, make_response
 import pandas as pd
+
+# Inicializa o SDK do Firebase com as credenciais baixadas
+cred = credentials.Certificate('path/to/credentials.json')
+firebase_admin.initialize_app(cred)
+
+# Cria uma conexão com o Firestore
+db = firestore.client()
 
 app = Flask(__name__)
 
-# Inicializa o banco de dados
-
-db = TinyDB('db.json')
-
-# Define as tabelas do banco de dados
-
-estudantes_table = db.table('estudantes')
-professores_table = db.table('professores')
-disciplinas_table = db.table('disciplinas')
-turmas_table = db.table('turmas')
-notas_table = db.table('notas')
-faltas_table = db.table('faltas')
-
-# Rota para listar todos os estudantes
-
-@app.route("/estudantes", methods=["GET"])
-def get_estudantes():
-    estudantes = estudantes_table.all()
-    return jsonify(estudantes)
-
-# Rota para adicionar um novo estudante
-
-@app.route("/estudantes", methods=["POST"])
-def add_estudante():
-    novo_estudante = request.get_json()
-    estudantes_table.insert(novo_estudante)
-    return jsonify(novo_estudante), 201
-
-# Rota para atualizar um estudante
-
-@app.route("/estudantes/<int:estudante_id>", methods=["PUT"])
-def update_estudante(estudante_id):
-    estudante = estudantes_table.get(doc_id=estudante_id)
-    if estudante is None:
-        return jsonify({"erro": "Estudante não encontrado"}), 404
-
-    dados_atualizados = request.get_json()
-    estudantes_table.update(dados_atualizados, doc_ids=[estudante_id])
-    return jsonify(estudantes_table.get(doc_id=estudante_id))
-
-# Rota para excluir um estudante
-
-@app.route("/estudantes/<int:estudante_id>", methods=["DELETE"])
-def delete_estudante(estudante_id):
-    estudantes_table.remove(doc_ids=[estudante_id])
-    return jsonify({"mensagem": "Estudante excluído com sucesso"}), 200
-
-# Rota para listar todos os professores
-
-@app.route("/professores", methods=["GET"])
-def get_professores():
-    professores = professores_table.all()
-    return jsonify(professores)
-
-# Rota para adicionar um novo professor
-
-@app.route("/professores", methods=["POST"])
-def add_professor():
-    novo_professor = request.get_json()
-    professores_table.insert(novo_professor)
-    return jsonify(novo_professor), 201
-
-# Rota para atualizar um professor
-
-@app.route("/professores/<int:professor_id>", methods=["PUT"])
-def update_professor(professor_id):
-    professor = professores_table.get(doc_id=professor_id)
-    if professor is None:
-        return jsonify({"erro": "Professor não encontrado"}), 404
-
-    dados_atualizados = request.get_json()
-    professores_table.update(dados_atualizados, doc_ids=[professor_id])
-    return jsonify(professores_table.get(doc_id=professor_id))
-
-# Rota para excluir um professor
-
-@app.route("/professores/<int:professor_id>", methods=["DELETE"])
-def delete_professor(professor_id):
-    professores_table.remove(doc_ids=[professor_id])
-    return jsonify({"mensagem": "Professor excluído com sucesso"}), 200
-
-# Rota para listar todas as disciplinas
-
-@app.route("/disciplinas", methods=["GET"])
-def get_disciplinas():
-    disciplinas = disciplinas_table.all()
-    return jsonify(disciplinas)
-
-# Rota para adicionar uma nova disciplina
-
-@app.route("/disciplinas", methods=["POST"])
-def add_disciplina():
-    nova_disciplina = request.get_json()
-    disciplinas_table.insert(nova_disciplina)
-    return jsonify(nova_disciplina), 201
-
-# Rota para atualizar uma disciplina
-
-@app.route("/disciplinas/<int:disciplina_id>", methods=["PUT"])
-def update_disciplina(disciplina_id):
-    disciplina = disciplinas_table.get(doc_id=disciplina_id)
-    if disciplina is None:
-        return jsonify({"erro": "Disciplina não encontrada"}), 404
-
-    dados_atualizados = request.get_json()
-    disciplinas_table.update(dados_atualizados, doc_ids=[disciplina_id])
-    return jsonify(disciplinas_table.get(doc_id=disciplina_id))
-
-# Rota para excluir uma disciplina
-
-@app.route("/disciplinas/<int:disciplina_id>", methods=["DELETE"])
-def delete_disciplina(disciplina_id):
-    disciplinas_table.remove(doc_ids=[disciplina_id])
-    return jsonify({"mensagem": "Disciplina excluída com sucesso"}), 200
-
-# Rota para listar todas as turmas
-
-@app.route("/turmas", methods=["GET"])
-def get_turmas():
-    turmas = turmas_table.all()
-    return jsonify(turmas)
-
-# Rota para adicionar uma nova turma
-
-@app.route("/turmas", methods=["POST"])
-def add_turma():
-    nova_turma = request.get_json()
-    turmas_table.insert(nova_turma)
-    return jsonify(nova_turma), 201
-
-# Rota para atualizar uma turma
-
-@app.route("/turmas/<int:turma_id>", methods=["PUT"])
-def update_turma(turma_id):
-    turma = turmas_table.get(doc_id=turma_id)
-    if turma is None:
-        return jsonify({"erro": "Turma não encontrada"}), 404
-
-    dados_atualizados = request.get_json()
-    turmas_table.update(dados_atualizados, doc_ids=[turma_id])
-    return jsonify(turmas_table.get(doc_id=turma_id))
-
-# Rota para excluir uma turma
-
-@app.route("/turmas/<int:turma_id>", methods=["DELETE"])
-def delete_turma(turma_id):
-    turmas_table.remove(doc_ids=[turma_id])
-    return jsonify({"mensagem": "Turma excluída com sucesso"}), 200
-
-# Rota para listar todas as notas de um estudante em uma disciplina
-
-@app.route("/notas/<int:estudante_id>/<int:disciplina_id>", methods=["GET"])
-def get_notas(estudante_id, disciplina_id):
-    notas = notas_table.search((Query().estudante_id == estudante_id) & (Query().disciplina_id == disciplina_id))
-    return jsonify(notas)
-
-# Rota para adicionar uma nova nota
-
-@app.route("/notas", methods=["POST"])
-def add_nota():
-    nova_nota = request.get_json()
-    notas_table.insert(nova_nota)
-    return jsonify(nova_nota), 201
-
-# Rota para atualizar uma nota
-
-@app.route("/notas/<int:nota_id>", methods=["PUT"])
-def update_nota(nota_id):
-    nota = notas_table.get(doc_id=nota_id)
-    if nota is None:
-        return jsonify({"erro": "Nota não encontrada"}), 404
-
-    dados_atualizados = request.get_json()
-    notas_table.update(dados_atualizados, doc_ids=[nota_id])
-    return jsonify(notas_table.get(doc_id=nota_id))
-
-# Rota para excluir uma nota
-
-@app.route("/notas/<int:nota_id>", methods=["DELETE"])
-def delete_nota(nota_id):
-    notas_table.remove(doc_ids=[nota_id])
-    return jsonify({"mensagem": "Nota excluída com sucesso"}), 200
-
-# Rota para listar todas as faltas de um estudante em uma disciplina
-
-@app.route("/faltas/<int:estudante_id>/<int:disciplina_id>", methods=["GET"])
-def get_faltas(estudante_id, disciplina_id):
-    faltas = faltas_table.search((Query().estudante_id == estudante_id) & (Query().disciplina_id == disciplina_id))
-    return jsonify(faltas)
-
-# Rota para adicionar uma nova falta
-
-@app.route("/faltas", methods=["POST"])
-def add_falta():
-    nova_falta = request.get_json()
-    faltas_table.insert(nova_falta)
-    return jsonify(nova_falta), 201
-
-# Rota para atualizar uma falta
-
-@app.route("/faltas/<int:falta_id>", methods=["PUT"])
-def update_falta(falta_id):
-    falta = faltas_table.get(doc_id=falta_id)
-    if falta is None:
-        return jsonify({"erro": "Falta não encontrada"}), 404
-
-    dados_atualizados = request.get_json()
-    faltas_table.update(dados_atualizados, doc_ids=[falta_id])
-    return jsonify(faltas_table.get(doc_id=falta_id))
-
-# Rota para excluir uma falta
-
-@app.route("/faltas/<int:falta_id>", methods=["DELETE"])
-def delete_falta(falta_id):
-    faltas_table.remove(doc_ids=[falta_id])
-    return jsonify({"mensagem": "Falta excluída com sucesso"}), 200
-
-# Rota para gerar um relatório de notas e faltas de um estudante em uma disciplina
-
-@app.route("/relatorio/<int:estudante_id>/<int:disciplina_id>", methods=["GET"])
-def gerar_relatorio(estudante_id, disciplina_id):
-    notas = notas_table.search((Query().estudante_id == estudante_id) & (Query().disciplina_id == disciplina_id))
-    faltas = faltas_table.search((Query().estudante_id == estudante_id) & (Query().disciplina_id == disciplina_id))
-
-    # Cria um DataFrame com as notas e faltas
-    
-    df_notas = pd.DataFrame(notas)
-    df_faltas = pd.DataFrame(faltas)
-
-    # Agrupa as notas por tipo e calcula a média
-    
-    df_notas = df_notas.groupby('tipo').agg({'valor': 'mean'}).reset_index()
-
-    # Calcula o total de faltas
-    
-    total_faltas = df_faltas['quantidade'].sum()
-
-    # Cria um arquivo Excel com o relatório
-    
-    writer = pd.ExcelWriter('relatorio.xlsx', engine='openpyxl')
-    df_notas.to_excel(writer, sheet_name='Notas', index=False)
-    df_faltas.to_excel(writer, sheet_name='Faltas', index=False)
-    writer.save()
-
-    # Envia o arquivo Excel como resposta
-    
-    return send_file('relatorio.xlsx', as_attachment=True)
-
-if __name__ == "__main__":
-    app.run(debug=True)
+# Define a rota para cadastrar um aluno
+@app.route('/alunos', methods=['POST'])
+def cadastrar_aluno():
+    # Obtém os dados do aluno a partir do corpo da requisição
+    aluno = request.json
+    # Adiciona o aluno ao Firestore
+    db.collection('alunos').add(aluno)
+    # Retorna uma mensagem de sucesso
+    return jsonify({'mensagem': 'Aluno cadastrado com sucesso!'})
+
+# Define a rota para baixar os dados em formato CSV
+@app.route('/download', methods=['GET'])
+def download_csv():
+    # Obtém os dados do Firestore
+    alunos_ref = db.collection('alunos').get()
+    alunos = [aluno.to_dict() for aluno in alunos_ref]
+    # Converte os dados em um DataFrame do pandas
+    df = pd.DataFrame(alunos)
+    # Gera um arquivo CSV a partir do DataFrame
+    csv = df.to_csv(index=False)
+    # Cria uma resposta HTTP com o arquivo CSV
+    response = make_response(csv)
+    response.headers['Content-Disposition'] = 'attachment; filename=dados.csv'
+    response.headers['Content-Type'] = 'text/csv'
+    return response
+
+# Define a rota para fazer o upload de dados a partir de um arquivo CSV
+@app.route('/upload', methods=['POST'])
+def upload_csv():
+    # Obtém o arquivo CSV do corpo da requisição
+    file = request.files['file']
+    # Lê o arquivo CSV com o pandas
+    df = pd.read_csv(file)
+    # Itera sobre as linhas do DataFrame e adiciona cada linha ao Firestore
+    for _, row in df.iterrows():
+        db.collection('alunos').add(row.to_dict())
+    # Retorna uma mensagem de sucesso
+    return jsonify({'mensagem': 'Dados adicionados com sucesso!'})
+
+# Define a rota para atualizar os dados de um aluno
+@app.route('/alunos/<aluno_id>', methods=['PUT'])
+def atualizar_aluno(aluno_id):
+    # Obtém os novos dados do aluno a partir do corpo da requisição
+    novos_dados = request.json
+    # Atualiza os dados do aluno no Firestore
+    db.collection('alunos').document(aluno_id).update(novos_dados)
+    # Retorna uma mensagem de sucesso
+    return jsonify({'mensagem': 'Dados do aluno atualizados com sucesso!'})
+
+# Define a rota para cadastrar um professor
+@app.route('/professores', methods=['POST'])
+def cadastrar_professor():
+    # Obtém os dados do professor a partir do corpo da requisição
+    professor = request.json
+    # Adiciona o professor ao Firestore
+    db.collection('professores').add(professor)
+    # Retorna uma mensagem de sucesso
+    return jsonify({'mensagem': 'Professor cadastrado com sucesso!'})
+
+# Define a rota para cadastrar uma disciplina
+@app.route('/disciplinas', methods=['POST'])
+def cadastrar_disciplina():
+    # Obtém os dados da disciplina a partir do corpo da requisição
+    disciplina = request.json
+    # Adiciona a disciplina ao Firestore
+    db.collection('disciplinas').add(disciplina)
+    # Retorna uma mensagem de sucesso
+    return jsonify({'mensagem': 'Disciplina cadastrada com sucesso!'})
+
+# Define a rota para cadastrar uma turma
+@app.route('/turmas', methods=['POST'])
+def cadastrar_turma():
+    # Obtém os dados da turma a partir do corpo da requisição
+    turma = request.json
+    # Adiciona a turma ao Firestore
+    db.collection('turmas').add(turma)
+    # Retorna uma mensagem de sucesso
+    return jsonify({'mensagem': 'Turma cadastrada com sucesso!'})
+
+# Define a rota para matricular um aluno em uma turma e disciplina
+@app.route('/matriculas', methods=['POST'])
+def matricular_aluno():
+    # Obtém os dados da matrícula a partir do corpo da requisição
+    matricula = request.json
+    # Adiciona a matrícula ao Firestore
+    db.collection('matriculas').add(matricula)
+    # Retorna uma mensagem de sucesso
+    return jsonify({'mensagem': 'Aluno matriculado com sucesso!'})
+
+# Define a rota para lançar notas e faltas de um aluno em uma turma e disciplina
+@app.route('/notas-faltas', methods=['POST'])
+def lancar_notas_faltas():
+    # Obtém os dados das notas e faltas a partir do corpo da requisição
+    notas_faltas = request.json
+    # Atualiza as notas e faltas do aluno no Firestore
+    db.collection('matulas').document(notas_faltas['matricula_id']).update(notas_faltas)
+    # Retorna uma mensagem de sucesso
+    return jsonify({'mensagem': 'Notas e faltas lançadas com sucesso!'})
+
+# Define a rota para gerar um boletim de desempenho de um aluno em uma turma e disciplina
+@app.route('/boletim/<matricula_id>', methods=['GET'])
+def gerar_boletim(matricula_id):
+    # Obtém os dados da matrícula a partir do ID da matrícula fornecido na requisição
+    matricula_ref = db.collection('matriculas').document(matricula_id).get()
+    matricula = matricula_ref.to_dict()
+    # Obtém os dados do aluno a partir ID do aluno na matrícula
+    aluno_ref = db.collection('alunos').document(matricula['aluno_id']).get()
+    aluno = aluno_ref.to_dict()
+    # Obtém os dados da disciplina a partir do ID da disciplina na matrícula
+    disciplina_ref = db.collection('disciplinas').document(matricula['disciplina_id']).get()
+    disciplina = disciplina_ref.to_dict()
+    # Obtém os dados da turma a partir do ID da turma na matrícula
+    turma_ref = db.collection('turmas').document(matricula['turma_id']).get()
+    turma = turma_ref.to_dict()
+    # Calcula a média do aluno na disciplina
+    media = sum(matricula['notas']) / len(matricula['notas'])
+    # Cria um dicionário com os dados do boletim
+    boletim = {
+        'aluno': aluno,
+        'disciplina': disciplina,
+        'turma': turma,
+        'notas': matricula['notas'],
+        'faltas': matricula['faltas'],
+        'media': media
+    }
+    # Retorna o boletim em formato JSON
+    return jsonify(boletim)
+
+# Define a rota para gerar um relatório de desempenho de todos os alunos em uma turma e disciplina
+@app.route('/relatorio/<turma_id>/<disciplina_id>', methods=['GET'])
+def gerar_relatorio(turma_id, disciplina_id):
+    # Obtém as matrículas dos alunos na turma e disciplina especificadas
+    matriculas_ref = db.collection('matriculas').where('turma_id', '==', turma_id).where('disciplina_id', '== disciplina_id).get()')
+    matriculas = [matricula.to_dict() for matricula in matriculas_ref]
+    # Obtém os dados da disciplina
+    disciplina_ref = db.collection('disciplinas').document(disciplina_id).get()
+    disciplina = disciplina_ref.to_dict()
+    # Obtém os dados da turma
+    turma_ref = db.collection('turmas').document(turma_id).get()
+    turma = turma_ref.to_dict()
+    # Cria uma lista com os dados de desempenho de cada aluno
+    desempenho_alunos = []
+    for matricula in matriculas:
+        # Obtém os dados do aluno
+        aluno_ref = db.collection('alunos').document(matricula['aluno_id']).get()
+        aluno = aluno_ref.to_dict()
+        # Calcula a média do aluno na disciplina
+        media = sum(matricula['notas']) / len(matricula['notas'])
+        # Adiciona os dados de desempenho do aluno à lista
+        desempenho_aluno = {
+            'aluno': aluno,
+            'notas': matricula['notas'],
+            'faltas': matricula['faltas'],
+            'media': media
+        }
+        desempenho_alunos.append(desempenho_aluno)
+    # Cria um dicionário com os dados do relatório
+    relatorio = {
+        'disciplina': disciplina,
+        'turma': turma,
+        'desempenho_alunos': desempenho_alunos
+    }
+    # Retorna o relatório em formato JSON
+    return jsonify(relatorio)
+
+# Define a rota para calcular o IMC de cada aluno
+@app.route('/imc', methods=['GET'])
+def calcular_imc():
+    # Obtém os dados de todos os alunos do Firestore
+    alunos_ref = db.collection('alunos').get()
+    alunos = [aluno.to_dict() for aluno in alunos_ref]
+    # Calcula o IMC de cada aluno
+    for aluno in alunos:
+        altura = aluno['altura']
+        peso = aluno['peso']
+        imc = peso / (altura ** 2)
+        aluno['imc'] = imc
+        # Atualiza os dados do aluno no Firestore
+        db.collectionalunos.document(aluno['id']).update({'imc':imc})
+    # Retorna uma mensagem de sucesso
+    return jsonify({'mensagem': 'IMC calculado com sucesso!'})
+
+if __name__ == '__main__':
+    app.run()
