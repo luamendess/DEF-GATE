@@ -6,7 +6,7 @@ from flask import Flask, jsonify, request, make_response
 import pandas as pd
 
 # Inicializa o SDK do Firebase com as credenciais baixadas
-cred = credentials.Certificate('credentials.json')
+cred = credentials.Certificate(r'C:\Users\Gianp\OneDrive\Documentos\GitHub\DEF-GATE\credentials.json')
 firebase_admin.initialize_app(cred)
 
 # Cria uma conexão com o Firestore
