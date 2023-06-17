@@ -11,17 +11,17 @@ db = client["meu_banco_de_dados"]
 colecao = db["minha_colecao"]
 
 # Dados a serem inseridos
-dados = {"Nome": "Ricardo", 
-         "Idade": 6, 
-         "RG": "58.795.316-0", 
-         "CPF": "510.404.958-26", 
-         "Nome do(a) Responsável": "Róger",
-         "RG do(a) Responsável": "39.556.000-7", 
-         "CPF do(a) Responsável": "131.404.518-06",
-         "Telefone do Responsável": "(11) 97123-0023", 
-         "E-mail do Responsável": "RogerPik4demetal@gmail.com", 
-         "Endereço": "Casa do caralho, 062",
-         "CEP": "25791-444",}
+dados = {"Nome": "João Gatilho", 
+         "Idade": 15, 
+         "RG": "546.456.456-89", 
+         "CPF": "489.456.698-78", 
+         "Nome do(a) Responsável": "",
+         "RG do(a) Responsável": "", 
+         "CPF do(a) Responsável": "",
+         "Telefone do Responsável": "", 
+         "E-mail do Responsável": "", 
+         "Endereço": "",
+         "CEP": "",}
 
 # Inserção dos dados
 resultado = colecao.insert_one(dados)
