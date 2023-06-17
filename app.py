@@ -2,12 +2,29 @@
 from flask import Flask, jsonify, request, make_response
 from pymongo import MongoClient
 import pandas as pd
+import serial
+import time
 
 app = Flask(__name__)
 
 # Estabelece uma conexão com o MongoDB
 client = MongoClient('mongodb://localhost:27017/')
 db = client['nome_do_banco_de_dados']  # Substitua 'nome_do_banco_de_dados' pelo nome do seu banco de dados
+
+# Estabelece uma conexão com o Arduino
+#arduino = serial.Serial(r'COM3', 9600)
+#time.sleep(2)
+
+def get_arduino_data():
+    arduino.write(b'1')
+    arduino_data = arduino.readline().decode('utf-8').rstrip()
+    return arduino_data
+
+# Define a rota para obter os dados do Arduino
+@app.route('/arduino', methods=['GET'])
+def arduino_data():
+    data = get_arduino_data()
+    return jsonify({'data': data})
 
 # Define a rota para cadastrar um aluno
 @app.route('/alunos', methods=['POST'])
@@ -55,6 +72,13 @@ def atualizar_aluno(aluno_id):
     db.alunos.update_one({'_id': aluno_id}, {'$set': novos_dados})
     # Retorna uma mensagem de sucesso
     return jsonify({'mensagem': 'Dados do aluno atualizados com sucesso!'})
+# Define a rota para obter os dados do Arduino de um aluno
+@app.route('/arduino/<aluno_id>', methods=['GET'])
+def get_arduino_data(aluno_id):
+    # Obtém os dados do Arduino do aluno a partir do ID do aluno fornecido na requisição
+    arduino_data = db.arduino.find_one({'aluno_id': aluno_id})
+    # Retorna os dados do Arduino em formato JSON
+    return jsonify(arduino_data)
 # Define a rota para cadastrar um professor
 @app.route('/professores', methods=['POST'])
 def cadastrar_professor():
