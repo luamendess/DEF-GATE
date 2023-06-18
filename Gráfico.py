@@ -1,23 +1,22 @@
-from flask import Flask, render_template
-from pymongo import MongoClient
-import json
+import matplotlib.pyplot as plt
 
-app = Flask(__name__)
+# Lista de pessoas com peso e altura
+pessoas = [
+    {"nome": "João", "peso": 300, "altura": 1.90},
+    {"nome": "Maria", "peso": 60, "altura": 1.68},
+    {"nome": "Carlos", "peso": 70, "altura": 1.80},
+    # Adicione mais pessoas conforme necessário
+]
 
-client = MongoClient("mongodb://localhost:27017/")
-db = client["meu_banco_de_dados"]
-colecao = db["minha_colecao"]
+# Calcula o IMC para cada pessoa e armazena em uma lista
+imcs = [p["peso"] / (p["altura"] ** 2) for p in pessoas]
 
-@app.route('/')
-def home():
-    return render_template('index.html')
+# Cria uma lista com os nomes para usar como rótulos no eixo x
+nomes = [p["nome"] for p in pessoas]
 
-@app.route('/data')
-def data():
-    dados_alunos = list(colecao.find())
-    for aluno in dados_alunos:
-        aluno['_id'] = str(aluno['_id'])  # Convertendo ObjectId para string
-    return json.dumps(dados_alunos)
-
-if __name__ == '__main__':
-    app.run()
+# Cria um gráfico de barras com os IMCs
+plt.bar(nomes, imcs)
+plt.xlabel('Nome')
+plt.ylabel('IMC')
+plt.title('IMC por Pessoa')
+plt.show()
