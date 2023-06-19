@@ -20,29 +20,12 @@ def form():
         <form action="/save" method="post">
             <label for="nome">Nome:</label><br>
             <input type="text" id="nome" name="nome"><br>
-            <label for="idade">Idade:</label><br>
-            <input type="number" id="idade" name="idade"><br>
+            <label for="peso">Peso (em kg):</label><br>
+            <input type="number" step="0.01" id="peso" name="peso"><br
             <label for="altura">Altura (em metros):</label><br>
             <input type="number" step="0.01" id="altura" name="altura"><br>
-            <label for="peso">Peso (em kg):</label><br>
-            <input type="number" step="0.01" id="peso" name="peso"><br>
-            <label for="imc">IMC:</label><br>
-            <input type="number" step="0.01" id="imc" name="imc" readonly><br>
             <input type="submit" value="Registrar">
         </form>
-        <script>
-            document.getElementById('altura').addEventListener('input', calculateIMC);
-            document.getElementById('peso').addEventListener('input', calculateIMC);
-
-            function calculateIMC() {
-                const altura = parseFloat(document.getElementById('altura').value);
-                const peso = parseFloat(document.getElementById('peso').value);
-                if (!isNaN(altura) && !isNaN(peso)) {
-                    const imc = peso / (altura * altura);
-                    document.getElementById('imc').value = imc.toFixed(2);
-                }
-            }
-        </script>
     </body>
     </html>
     ''')

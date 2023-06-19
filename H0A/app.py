@@ -11,7 +11,7 @@ app = Flask(__name__)
 client = MongoClient('mongodb://localhost:27017/')
 db = client['nome_do_banco_de_dados']  # Substitua 'nome_do_banco_de_dados' pelo nome do seu banco de dados
 
-# Estabelece uma conexão com o Arduino
+# "Estabelece uma conexão com o Arduino
 #arduino = serial.Serial(r'COM3', 9600)
 #time.sleep(2)
 
