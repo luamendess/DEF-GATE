@@ -88,9 +88,6 @@ def home():
             </div>
             <input type="submit" value="Registrar">
         </form>
-        <Peço desculpas pela resposta anterior ter sido cortada. Aqui está a continuação do código:
-
-```python
         <button id="add">Adicionar Aluno</button>
         <script>
             document.getElementById('add').addEventListener('click', function(e) {

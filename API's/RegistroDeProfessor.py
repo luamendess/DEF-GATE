@@ -7,7 +7,7 @@ client = MongoClient("mongodb://localhost:27017/")
 db = client["meu_banco_de_dados"]
 colecao = db["minha_colecao_professores"]
 
-@app.route('/')
+@app.route('/prof')
 def form():
     return render_template_string('''
     <!DOCTYPE html>
