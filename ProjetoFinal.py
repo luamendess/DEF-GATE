@@ -413,17 +413,6 @@ def home():
         <br><br>
         <br><br>
         <br><br>
-        <br><br>
-        <br><br>
-        <br><br>
-        <br><br>
-        <br><br>
-        <br><br>
-        <br><br>
-        <br><br>
-        <br><br>
-        <br><br>
-        <br><br>
         <div class="content">
             <div class="content-item">
                 <img src="data:image/png;base64,{{ image }}">
